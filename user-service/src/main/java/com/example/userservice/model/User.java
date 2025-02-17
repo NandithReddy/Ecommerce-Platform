@@ -1,5 +1,6 @@
 package com.example.userservice.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,6 +18,7 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
+    //@JsonIgnore //should be uncommented later, just commented for testing
     @Column(nullable = false)
     private String password;
 
