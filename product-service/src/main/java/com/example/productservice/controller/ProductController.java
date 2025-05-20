@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/products")
 @RequiredArgsConstructor
@@ -18,6 +19,11 @@ public class ProductController {
     @PostMapping
     public ResponseEntity<Product> createProduct(@RequestBody Product product) {
         return ResponseEntity.ok(productService.createProduct(product));
+    }
+    @GetMapping("/search")
+    public ResponseEntity<List<Product>> searchByName(@RequestParam String name) {
+        List<Product> products = productService.searchByName(name);
+        return ResponseEntity.ok(products);
     }
 
     @GetMapping

@@ -2,7 +2,7 @@ package com.example.orderservice.service;
 
 import com.example.orderservice.model.Order;
 import com.example.orderservice.model.OrderItem;
-import com.example.orderservice.model.ProductDTO;
+import com.example.orderservice.dto.ProductDTO;
 import com.example.orderservice.repository.OrderItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

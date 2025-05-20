@@ -35,8 +35,10 @@ public class OrderController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Order>> getAllOrders() {
-        return ResponseEntity.ok(orderService.getAllOrders());
+    public ResponseEntity<List<Order>> getAllOrders(@RequestParam(value = "userId" , required = false) UUID userId) {
+        if(userId != null) {
+            return ResponseEntity.ok(orderService.getOrdersByUserId(userId));
+        }else return ResponseEntity.ok(orderService.getAllOrders());
     }
 
     @GetMapping("/{id}")

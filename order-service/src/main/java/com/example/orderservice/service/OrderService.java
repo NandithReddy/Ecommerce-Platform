@@ -110,6 +110,9 @@ public class OrderService {
         o.setTotalPrice(sum);
 
     }
+    public List<Order> getOrdersByUserId(UUID userId) {
+        return orderRepository.findByUserId(userId);
+    }
 
 
     public List<Order> getAllOrders() {
