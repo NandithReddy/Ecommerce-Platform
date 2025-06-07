@@ -29,6 +29,14 @@ public class UserController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
     }
+    @GetMapping("/exists/{id}")
+    public ResponseEntity<User> getUserExistsById(@PathVariable UUID id) {
+            if(userService.getUserById(id).isPresent()) {
+                return ResponseEntity.ok().build(); // 200 OK (User exists)
+            } else {
+                return ResponseEntity.notFound().build(); // 404 Not Found (User does not exist)
+            }
+    }
 
 
     @PostMapping

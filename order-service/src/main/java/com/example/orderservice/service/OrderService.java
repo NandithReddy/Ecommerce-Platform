@@ -66,7 +66,7 @@ public class OrderService {
     private final RestTemplate restTemplate = new RestTemplate();
 
     private boolean userExists(UUID userId) {
-        String url = "http://localhost:8080/api/users/" + userId;
+        String url = "http://localhost:8080/api/users/exists/" + userId;
         try {
             restTemplate.getForObject(url, String.class);
             return true; // If the request succeeds, the user exists

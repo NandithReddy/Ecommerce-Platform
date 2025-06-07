@@ -31,7 +31,21 @@ public class AuthController {
             return ResponseEntity.status(401).body(Map.of("error", "Invalid email or password"));
         }
 
-        String token = jwtUtil.generateToken(email);
+        String token = jwtUtil.generateToken(user.getEmail() , user.getId());
+
+        return ResponseEntity.ok(Map.of("token", token));
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> login(@RequestBody User user) {
+        if (userRepository.existsByEmail(user.getEmail())) {
+            return ResponseEntity.status(400).body(Map.of("error", "Email already exists"));
+        }
+
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        userRepository.save(user);
+
+        String token = jwtUtil.generateToken(user.getEmail(), user.getId());
 
         return ResponseEntity.ok(Map.of("token", token));
     }
