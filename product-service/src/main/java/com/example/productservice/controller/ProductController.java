@@ -10,12 +10,13 @@ import java.util.List;
 import java.util.UUID;
 
 @CrossOrigin(
-        origins = {
-                "https://*.vercel.app",
-                "http://localhost:3000"
+        originPatterns = {
+                "https://*.vercel.app",   // Vercel prod + every preview
+                "http://localhost:3000"   // local dev server
         },
         allowedHeaders = "*",
-        allowCredentials = "true"
+        methods = {},                // leave empty = allow all HTTP verbs
+        allowCredentials = "true"    // note: *string* literal
 )
 @RestController
 @RequestMapping("/api/products")
