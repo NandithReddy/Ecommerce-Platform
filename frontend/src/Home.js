@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { slugify } from './utils/slugify';
+import { PRODUCT_API } from './api';
 
 // load images from src/products
 const images = require.context('./products', false, /\.png$/);
@@ -10,7 +11,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:8081/api/products')
+    fetch(`${PRODUCT_API}/api/products`) 
       .then(res => res.json())
       .then(all => {
         const desiredOrder = [

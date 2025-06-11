@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-
+import { PRODUCT_API } from './api'; 
 // load your local PNGs
 const images = require.context('./products', false, /\.png$/);
 const slugify = name =>
@@ -21,8 +21,8 @@ function Products({ onCartUpdate }) {
 
   useEffect(() => {
     const url = nameFilter
-      ? `http://localhost:8081/api/products/search?name=${encodeURIComponent(nameFilter)}`
-      : 'http://localhost:8081/api/products';
+      ? `${PRODUCT_API}/api/products/search?name=${encodeURIComponent(nameFilter)}`   // ← CHANGED
+      : `${PRODUCT_API}/api/products`; 
     fetch(url)
       .then(res => res.json())
       .then(data => setProducts(data || []))
