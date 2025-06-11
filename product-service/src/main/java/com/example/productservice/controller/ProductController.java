@@ -9,7 +9,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(
+        origins = {
+                "https://*.vercel.app",
+                "http://localhost:3000"
+        },
+        allowedHeaders = "*",
+        allowCredentials = "true"
+)
 @RestController
 @RequestMapping("/api/products")
 @RequiredArgsConstructor

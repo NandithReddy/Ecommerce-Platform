@@ -12,7 +12,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(
+        origins = {
+                "https://*.vercel.app",
+                "http://localhost:3000"
+        },
+        allowedHeaders = "*",
+        allowCredentials = "true"
+)
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {

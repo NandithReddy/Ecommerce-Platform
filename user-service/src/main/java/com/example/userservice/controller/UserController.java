@@ -12,6 +12,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
+@CrossOrigin(
+        origins = {
+                "https://*.vercel.app",
+                "http://localhost:3000"
+        },
+        allowedHeaders = "*",
+        allowCredentials = "true"
+)
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {

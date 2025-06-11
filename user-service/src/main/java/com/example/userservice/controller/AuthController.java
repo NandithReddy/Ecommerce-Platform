@@ -14,7 +14,14 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(
+        origins = {
+                "https://*.vercel.app",
+                "http://localhost:3000"
+        },
+        allowedHeaders = "*",
+        allowCredentials = "true"
+)
 public class AuthController {
 
     private final UserRepository userRepository;
