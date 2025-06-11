@@ -1,30 +1,53 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
-function Products() {
+// load your local PNGs
+const images = require.context('./products', false, /\.png$/);
+const slugify = name =>
+  name
+    .toString()
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+function Products({ onCartUpdate }) {
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const location = useLocation();
-
-  const searchParams = new URLSearchParams(location.search);
-  const name = searchParams.get('name');
+  const { search } = useLocation();
+  const navigate = useNavigate();
+  const nameFilter = new URLSearchParams(search).get('name');
 
   useEffect(() => {
-    const url = name
-      ? `http://localhost:8081/api/products/search?name=${encodeURIComponent(name)}`
-      : `http://localhost:8081/api/products`;
-
+    const url = nameFilter
+      ? `http://localhost:8081/api/products/search?name=${encodeURIComponent(nameFilter)}`
+      : 'http://localhost:8081/api/products';
     fetch(url)
-      .then((res) => res.json())
-      .then((data) => {
-        setProducts(data || []);
-        setIsLoading(false);
+      .then(res => res.json())
+      .then(data => setProducts(data || []))
+      .catch(err => {
+        console.error(err);
+        toast.error('Failed to load products');
       })
-      .catch((err) => {
-        console.error('Error fetching products:', err);
-        setIsLoading(false);
-      });
-  }, [name]);
+      .finally(() => setIsLoading(false));
+  }, [nameFilter]);
+
+  const addToCart = product => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const existing = cart.find(i => i.productId === product.id);
+    if (existing) existing.quantity++;
+    else cart.push({ productId: product.id, quantity: 1 });
+    localStorage.setItem('cart', JSON.stringify(cart));
+    window.dispatchEvent(new Event('cartUpdated'));
+    toast.success('Added to cart', { autoClose: 800 });
+    onCartUpdate && onCartUpdate();
+  };
 
   return (
     <main>
@@ -33,46 +56,54 @@ function Products() {
           <h2 className="text-center mb-4">All Products</h2>
 
           {isLoading ? (
-            <p className="text-center">Loading products...</p>
-          ) : products.length === 0 ? (
+            <p className="text-center">Loading products…</p>
+          ) : products.filter(p => p.stock > 0).length === 0 ? (
             <p className="text-center text-muted">No products found.</p>
           ) : (
             <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
               {products
-                .filter((product) => product.stock > 0)
-                .map((product) => (
-                  <div className="col" key={product.id}>
-                    <div className="card h-100 shadow-sm">
-                      <svg
-                        className="bd-placeholder-img card-img-top"
-                        width="100%"
-                        height="225"
-                        xmlns="http://www.w3.org/2000/svg"
-                        role="img"
-                        aria-label="Placeholder: Thumbnail"
-                        preserveAspectRatio="xMidYMid slice"
-                        focusable="false"
-                      >
-                        <rect width="100%" height="100%" fill="#55595c" />
-                        <text x="50%" y="50%" fill="#eceeef" dy=".3em" textAnchor="middle">
-                          {product.name}
-                        </text>
-                      </svg>
-
-                      <div className="card-body d-flex flex-column">
-                        <p className="card-text">{product.description}</p>
-                        <p className="fw-bold mb-2">${product.price}</p>
-                        <div className="mt-auto d-flex justify-content-between align-items-center">
-                          <div className="btn-group">
-                            <button className="btn btn-sm btn-outline-secondary">View</button>
-                            <button className="btn btn-sm btn-outline-secondary">Add to cart</button>
+                .filter(p => p.stock > 0)
+                .map(product => {
+                  const imgSrc = images(`./${slugify(product.name)}.png`);
+                  return (
+                    <div className="col" key={product.id}>
+                      <div className="card h-100 shadow-sm">
+                        <img
+                          src={imgSrc}
+                          className="card-img-top"
+                          style={{ height: 225, objectFit: 'cover' }}
+                          alt={product.name}
+                        />
+                        <div className="card-body d-flex flex-column">
+                          {/* Product Name */}
+                          <h5 className="card-title">{product.name}</h5>
+                          {/* Price badge under name */}
+                          <div className="mb-2">
+                            <span className="badge bg-success text-white fs-6">
+                              ${product.price.toFixed(2)}
+                            </span>
                           </div>
-                          <small className="text-muted">{product.stock} in stock</small>
+                          {/* Description in smaller muted text */}
+                          <p className="card-text text-muted mb-3" style={{ fontSize: '0.9rem' }}>
+                            {product.description}
+                          </p>
+                          {/* Add to cart + stock */}
+                          <div className="mt-auto d-flex justify-content-between align-items-center">
+                            <button
+                              className="btn btn-sm btn-outline-secondary"
+                              onClick={() => addToCart(product)}
+                            >
+                              Add to cart
+                            </button>
+                            <small className="text-muted">
+                              {product.stock} in stock
+                            </small>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
             </div>
           )}
         </div>

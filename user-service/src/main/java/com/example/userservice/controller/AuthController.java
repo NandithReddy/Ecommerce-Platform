@@ -14,6 +14,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:3000")
 public class AuthController {
 
     private final UserRepository userRepository;
@@ -31,7 +32,7 @@ public class AuthController {
             return ResponseEntity.status(401).body(Map.of("error", "Invalid email or password"));
         }
 
-        String token = jwtUtil.generateToken(user.getEmail() , user.getId());
+        String token = jwtUtil.generateToken(user.getEmail() , user.getId() , user.getFirstName() , user.getLastName());
 
         return ResponseEntity.ok(Map.of("token", token));
     }
@@ -45,7 +46,7 @@ public class AuthController {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
 
-        String token = jwtUtil.generateToken(user.getEmail(), user.getId());
+        String token = jwtUtil.generateToken(user.getEmail(), user.getId(), user.getFirstName(), user.getLastName());
 
         return ResponseEntity.ok(Map.of("token", token));
     }

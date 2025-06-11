@@ -11,3 +11,30 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+/* Flip the default white arrows to black */
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  filter: invert(1);
+}
+
+@media (max-width: 767.98px) {
+  main {
+    padding-top: 5rem;  /* adjust to match your header height */
+  }
+}
+/* force captions to run all the way left/right and fill the slide */
+.carousel-caption {
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 1.5rem;
+}
+
+/* keep the text itself aligned to your usual container width */
+.carousel-caption .container {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+

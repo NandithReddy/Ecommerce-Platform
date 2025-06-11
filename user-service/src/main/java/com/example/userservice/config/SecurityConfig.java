@@ -28,7 +28,16 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/login" , "/api/auth/register","/api/users/exists/{id}").permitAll() // Public endpoints
+                        .requestMatchers(
+                                "/api/auth/login",
+                                "/api/auth/register",
+                                "/api/users/exists/**",
+                                // open up the OpenAPI JSON and all Swagger UI resources:
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/webjars/**"
+                        ).permitAll() // Public endpoints
                         .anyRequest().authenticated() // Protect all other endpoints
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // No sessions

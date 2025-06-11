@@ -16,10 +16,10 @@ import java.util.UUID;
 public class ProductController {
     private final ProductService productService;
 
-    @PostMapping
+   /* @PostMapping
     public ResponseEntity<Product> createProduct(@RequestBody Product product) {
         return ResponseEntity.ok(productService.createProduct(product));
-    }
+    }*/
     @GetMapping("/search")
     public ResponseEntity<List<Product>> searchByName(@RequestParam String name) {
         List<Product> products = productService.searchByName(name);
@@ -35,7 +35,7 @@ public class ProductController {
         return ResponseEntity.ok(productService.getProductById(id));
     }
 
-    @PutMapping("/{id}")
+   /* @PutMapping("/{id}")
     public ResponseEntity<Product> updateProduct(@PathVariable UUID id, @RequestBody Product product) {
         return ResponseEntity.ok(productService.updateProduct(id, product));
     }
@@ -44,7 +44,7 @@ public class ProductController {
     public ResponseEntity<Void> deleteProduct(@PathVariable UUID id) {
         productService.deleteProduct(id); // If not found, it will throw ProductNotFoundException
         return ResponseEntity.noContent().build();
-    }
+    }*/
 
 
 }

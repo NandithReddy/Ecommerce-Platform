@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  # ─────── Databases ───────
+  user-db:
+    image: postgres:17-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: ecommerce_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: hk
+    volumes:
+      - user-db-data:/var/lib/postgresql/data
+
+  product-db:
+    image: postgres:17-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: products_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: hk
+    volumes:
+      - product-db-data:/var/lib/postgresql/data
+
+  order-db:
+    image: postgres:17-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: orders_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: hk
+    volumes:
+      - order-db-data:/var/lib/postgresql/data
+
+  # ─────── Microservices ───────
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    image: ecommerce-user-service:latest
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://user-db:5432/ecommerce_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: hk
+    depends_on:
+      - user-db
+
+  product-service:
+    build:
+      context: ./product-service
+      dockerfile: Dockerfile
+    image: ecommerce-product-service:latest
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://product-db:5432/products_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: hk
+    depends_on:
+      - product-db
+
+  order-service:
+    build:
+      context: ./order-service
+      dockerfile: Dockerfile
+    image: ecommerce-order-service:latest
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://order-db:5432/orders_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: hk
+      USER_SERVICE_URL: http://user-service:8080
+      PRODUCT_SERVICE_URL: http://product-service:8081
+    depends_on:
+      - order-db
+      - user-service
+      - product-service
+
+volumes:
+  user-db-data:
+  product-db-data:
+  order-db-data:

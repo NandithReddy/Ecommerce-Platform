@@ -36,3 +36,10 @@
     transform: rotate(360deg);
   }
 }
+body {
+  margin: 0;
+}
+
+main, .site-main, .main, .container, .page-content {
+  padding-top: 130px; /* Adjust as needed */
+}
