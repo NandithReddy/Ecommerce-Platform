@@ -44,7 +44,7 @@ A full-stack, microservices-based e-commerce application built with Spring Boot,
 
 ## Prerequisites
 - Java 21+
-- Node.js 16+ & npm
+- npm
 - Docker & Docker Compose (for local multi-service setup)
 
 ## Local Setup
