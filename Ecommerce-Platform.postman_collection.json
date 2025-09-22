@@ -1,86 +1,57 @@
 {
   "info": {
-    "name": "Ecommerce Platform API",
     "_postman_id": "ecommerce-platform-collection",
-    "description": "Postman collection for the E-commerce Platform microservices (User, Product, Order). Uses collection variables for base URLs and stores JWT token and userId from login response.",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "name": "Ecommerce Platform API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Postman collection for Ecommerce Platform microservices with JWT authentication."
   },
   "variable": [
-    {
-      "key": "user_api",
-      "value": "http://localhost:8080",
-      "type": "string"
-    },
-    {
-      "key": "product_api",
-      "value": "http://localhost:8081",
-      "type": "string"
-    },
-    {
-      "key": "order_api",
-      "value": "http://localhost:8082",
-      "type": "string"
-    },
-    {
-      "key": "token",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "userId",
-      "value": "",
-      "type": "string"
-    }
+    { "key": "user_base_url", "value": "http://localhost:8080" },
+    { "key": "product_base_url", "value": "http://localhost:8081" },
+    { "key": "order_base_url", "value": "http://localhost:8082" },
+    { "key": "jwt_token", "value": "" }
   ],
   "item": [
     {
       "name": "User Service",
       "item": [
         {
-          "name": "Signup - Register User",
+          "name": "Register",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "url": { "raw": "{{user_base_url}}/api/auth/register", "host": [ "{{user_base_url}}" ], "path": [ "api", "auth", "register" ] },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"testuser\",\n  \"email\": \"testuser@example.com\",\n  \"password\": \"Password123!\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{user_api}}/api/auth/signup",
-              "host": [
-                "{{user_api}}"
-              ],
-              "path": [
-                "api",
-                "auth",
-                "signup"
-              ]
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "url": { "raw": "{{user_base_url}}/api/auth/login", "host": [ "{{user_base_url}}" ], "path": [ "api", "auth", "login" ] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}"
             }
           },
-          "response": [],
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test('Status code is 201 or 200', function () {",
-                  "    pm.expect(pm.response.code).to.be.oneOf([200,201]);",
-                  "});",
-                  "try {",
-                  "  var json = pm.response.json();",
-                  "  var id = json.id || (json.user && (json.user.id || json.userId));",
-                  "  if (id) pm.collectionVariables.set('userId', id.toString());",
-                  "} catch(e) {}"
+                  "var json = pm.response.json();",
+                  "if (json.token) {",
+                  "    // Save token to collection variable and environment variable",
+                  "    pm.collectionVariables.set('jwt_token', json.token);",
+                  "    pm.environment.set('jwt_token', json.token);",
+                  "    console.log('Saved jwt_token to collection and environment');",
+                  "} else {",
+                  "    console.log('No token found in response');",
+                  "}"
                 ],
                 "type": "text/javascript"
               }
@@ -88,82 +59,60 @@
           ]
         },
         {
-          "name": "Login - Obtain JWT",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"Password123!\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{user_api}}/api/auth/login",
-              "host": [
-                "{{user_api}}"
-              ],
-              "path": [
-                "api",
-                "auth",
-                "login"
-              ]
-            }
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
-                  "try {",
-                  "  var json = pm.response.json();",
-                  "  // common token fields: token, accessToken, jwt",
-                  "  var token = json.token || json.accessToken || json.jwt || (json.data && (json.data.token || json.data.accessToken));",
-                  "  if (token) pm.collectionVariables.set('token', token);",
-                  "  // try to extract user id if present",
-                  "  var id = json.userId || (json.user && (json.user.id || json.user.userId)) || (json.data && json.data.userId);",
-                  "  if (id) pm.collectionVariables.set('userId', id.toString());",
-                  "} catch(e) { }"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
-        },
-        {
-          "name": "Get Current User - /api/users/me",
+          "name": "Get All Users",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{user_api}}/api/users/me",
-              "host": [
-                "{{user_api}}"
-              ],
-              "path": [
-                "api",
-                "users",
-                "me"
-              ]
+            "header": [ { "key": "Authorization", "value": "Bearer {{jwt_token}}" } ],
+            "url": { "raw": "{{user_base_url}}/api/users", "host": [ "{{user_base_url}}" ], "path": [ "api", "users" ] }
+          }
+        },
+        {
+          "name": "Get User By ID",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{jwt_token}}" } ],
+            "url": { "raw": "{{user_base_url}}/api/users/{{user_id}}", "host": [ "{{user_base_url}}" ], "path": [ "api", "users", "{{user_id}}" ] }
+          }
+        },
+        {
+          "name": "Check User Exists By ID",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{jwt_token}}" } ],
+            "url": { "raw": "{{user_base_url}}/api/users/exists/{{user_id}}", "host": [ "{{user_base_url}}" ], "path": [ "api", "users", "exists", "{{user_id}}" ] }
+          }
+        },
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{jwt_token}}" } ],
+            "url": { "raw": "{{user_base_url}}/api/users", "host": [ "{{user_base_url}}" ], "path": [ "api", "users" ] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"newuser@example.com\",\n  \"password\": \"newpassword\",\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Smith\"\n}"
             }
-          },
-          "response": []
+          }
+        },
+        {
+          "name": "Delete User By ID",
+          "request": {
+            "method": "DELETE",
+            "header": [ { "key": "Authorization", "value": "Bearer {{jwt_token}}" } ],
+            "url": { "raw": "{{user_base_url}}/api/users/{{user_id}}", "host": [ "{{user_base_url}}" ], "path": [ "api", "users", "{{user_id}}" ] }
+          }
+        },
+        {
+          "name": "Update User By ID",
+          "request": {
+            "method": "PUT",
+            "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{jwt_token}}" } ],
+            "url": { "raw": "{{user_base_url}}/api/users/{{user_id}}", "host": [ "{{user_base_url}}" ], "path": [ "api", "users", "{{user_id}}" ] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"updateduser@example.com\",\n  \"password\": \"updatedpassword\",\n  \"firstName\": \"Updated\",\n  \"lastName\": \"User\"\n}"
+            }
+          }
         }
       ]
     },
@@ -174,81 +123,22 @@
           "name": "Get All Products",
           "request": {
             "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{product_api}}/api/products",
-              "host": [
-                "{{product_api}}"
-              ],
-              "path": [
-                "api",
-                "products"
-              ]
-            }
-          },
-          "response": []
+            "url": { "raw": "{{product_base_url}}/api/products", "host": [ "{{product_base_url}}" ], "path": [ "api", "products" ] }
+          }
         },
         {
           "name": "Get Product By ID",
           "request": {
             "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{product_api}}/api/products/:productId",
-              "host": [
-                "{{product_api}}"
-              ],
-              "path": [
-                "api",
-                "products",
-                ":productId"
-              ],
-              "variable": [
-                {
-                  "key": "productId",
-                  "value": "1"
-                }
-              ]
-            }
-          },
-          "response": []
+            "url": { "raw": "{{product_base_url}}/api/products/{{product_id}}", "host": [ "{{product_base_url}}" ], "path": [ "api", "products", "{{product_id}}" ] }
+          }
         },
         {
-          "name": "Create Product (example)",
+          "name": "Search Products By Name",
           "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"4K UHD Monitor\",\n  \"description\": \"A beautiful 27-inch 4K monitor\",\n  \"price\": 399.99,\n  \"stock\": 10\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{product_api}}/api/products",
-              "host": [
-                "{{product_api}}"
-              ],
-              "path": [
-                "api",
-                "products"
-              ]
-            }
-          },
-          "response": []
+            "method": "GET",
+            "url": { "raw": "{{product_base_url}}/api/products/search?name={{search_name}}", "host": [ "{{product_base_url}}" ], "path": [ "api", "products", "search" ], "query": [ { "key": "name", "value": "{{search_name}}" } ] }
+          }
         }
       ]
     },
@@ -259,67 +149,22 @@
           "name": "Create Order",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "url": { "raw": "{{order_base_url}}/api/orders?userId={{user_id}}", "host": [ "{{order_base_url}}" ], "path": [ "api", "orders" ], "query": [ { "key": "userId", "value": "{{user_id}}" } ] },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"items\": [\n    {\n      \"productId\": 1,\n      \"quantity\": 1\n    }\n  ]\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{order_api}}/api/orders",
-              "host": [
-                "{{order_api}}"
-              ],
-              "path": [
-                "api",
-                "orders"
-              ]
+              "raw": "[\n  {\n    \"productId\": \"<product-uuid>\",\n    \"quantity\": 1\n  }\n]"
             }
-          },
-          "response": []
+          }
         },
         {
-          "name": "Get Orders By User",
+          "name": "Get Orders For User",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{order_api}}/api/orders/user/{{userId}}",
-              "host": [
-                "{{order_api}}"
-              ],
-              "path": [
-                "api",
-                "orders",
-                "user",
-                "{{userId}}"
-              ]
-            }
-          },
-          "response": []
+            "url": { "raw": "{{order_base_url}}/api/orders?userId={{user_id}}", "host": [ "{{order_base_url}}" ], "path": [ "api", "orders" ], "query": [ { "key": "userId", "value": "{{user_id}}" } ] }
+          }
         }
       ]
     }
   ]
 }
-
